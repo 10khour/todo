@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,7 +6,8 @@ class Task {
   bool finished = true;
   TextEditingController controller;
   Task({required this.controller, this.finished = false}) {
-    var uuid = Uuid();
+    var uuid = const Uuid();
     id = uuid.v4();
+    print("id $id");
   }
 }

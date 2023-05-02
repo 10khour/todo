@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:todo/task.dart';
 
+// ignore: must_be_immutable
 class TodoItem extends StatefulWidget {
   Task task;
 
-  Function(String id)? delete;
+  Function(Task task)? delete;
+  Function(Task task, bool state)? stateChange;
 
-  TodoItem({required this.task, this.delete});
+  TodoItem({super.key, required this.task, this.delete, this.stateChange});
 
   @override
   State<StatefulWidget> createState() {
@@ -34,6 +36,9 @@ class _TodoItemState extends State<TodoItem> {
             onChanged: (v) {
               setState(() {
                 widget.task.finished = v!;
+                if (widget.stateChange != null) {
+                  widget.stateChange!(widget.task, v);
+                }
               });
             },
             shape: const CircleBorder(),
@@ -53,7 +58,7 @@ class _TodoItemState extends State<TodoItem> {
           IconButton(
               onPressed: () {
                 if (widget.delete != null) {
-                  widget.delete!(widget.task.id);
+                  widget.delete!(widget.task);
                 }
               },
               icon: const Icon(Icons.delete_forever)),

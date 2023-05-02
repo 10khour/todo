@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:todo/task.dart';
 import 'package:todo/todo_item.dart';
 
+// ignore: must_be_immutable
 class TodoList extends StatefulWidget {
   List<Task> task = List.empty(growable: true);
+
+  TodoList({super.key});
   @override
   State<StatefulWidget> createState() {
     return _TodoListState();
@@ -59,7 +62,6 @@ class _TodoListState extends State<TodoList> {
                       widget.task.add(
                           Task(controller: TextEditingController(text: value)));
                     });
-                    print("add");
                   },
                   controller: controller,
                   decoration: const InputDecoration(
@@ -70,17 +72,21 @@ class _TodoListState extends State<TodoList> {
             child: ListView(
               children: widget.task
                   .map((e) => TodoItem(
-                        delete: (id) {
+                        stateChange: (t, state) {
+                          widget.task
+                              .firstWhere((element) => element.id == t.id)
+                              .finished = state;
+                        },
+                        delete: (t) {
                           setState(() {
-                            print("remove ${id}");
+                            print("remove ${t.id}");
 
                             widget.task
-                                .removeWhere((element) => element.id == id);
+                                .removeWhere((element) => element.id == t.id);
                             print("${widget.task.length}");
                           });
                         },
-                        task: Task(
-                            controller: e.controller, finished: e.finished),
+                        task: e,
                       ))
                   .toList(),
             ),
