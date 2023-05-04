@@ -8,6 +8,5 @@ class Task {
   Task({required this.controller, this.finished = false}) {
     var uuid = const Uuid();
     id = uuid.v4();
-    print("id $id");
   }
 }

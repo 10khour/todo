@@ -52,21 +52,22 @@ class _TodoListState extends State<TodoList> {
               margin:
                   const EdgeInsets.only(left: 8, right: 8, top: 1, bottom: 2),
               decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: Colors.grey),
+                  border:
+                      Border.all(width: 1, color: Colors.grey.withOpacity(0.2)),
                   borderRadius: BorderRadius.circular(8)),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: TextField(
-                  onSubmitted: (value) {
-                    setState(() {
-                      widget.task.add(
-                          Task(controller: TextEditingController(text: value)));
-                    });
-                  },
-                  controller: controller,
-                  decoration: const InputDecoration(
-                      hintText: "Add Task", border: InputBorder.none),
-                ),
+              child: TextField(
+                onSubmitted: (value) {
+                  setState(() {
+                    widget.task.add(
+                        Task(controller: TextEditingController(text: value)));
+                  });
+                },
+                controller: controller,
+                decoration: InputDecoration(
+                    fillColor: Colors.grey.withOpacity(0.1),
+                    filled: true,
+                    hintText: "Add a task",
+                    border: InputBorder.none),
               )),
           Expanded(
             child: ListView(
@@ -79,11 +80,8 @@ class _TodoListState extends State<TodoList> {
                         },
                         delete: (t) {
                           setState(() {
-                            print("remove ${t.id}");
-
                             widget.task
                                 .removeWhere((element) => element.id == t.id);
-                            print("${widget.task.length}");
                           });
                         },
                         task: e,

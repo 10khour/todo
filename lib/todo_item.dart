@@ -61,7 +61,10 @@ class _TodoItemState extends State<TodoItem> {
                   widget.delete!(widget.task);
                 }
               },
-              icon: const Icon(Icons.delete_forever)),
+              icon: const Icon(
+                Icons.delete_forever,
+                color: Colors.grey,
+              )),
           const SizedBox(
             width: 8,
           ),
