@@ -20,37 +20,18 @@ class _TodoListState extends State<TodoList> {
     const double titleWidth = 160;
     TextEditingController controller = TextEditingController();
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("今日任务"),
+        toolbarHeight: 40,
+        backgroundColor: const Color.fromRGBO(130, 77, 252, 0.9),
+      ),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
           Container(
-            height: 40,
-            decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-                        color: Colors.grey.withOpacity(0.2),
-                        style: BorderStyle.solid))),
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              child: Row(children: [
-                SizedBox(
-                  width: (size - titleWidth) / 2.0,
-                ),
-                const SizedBox(
-                  width: titleWidth,
-                  child: Text(
-                    '今日任务',
-                    style: TextStyle(fontSize: 23),
-                  ),
-                ),
-                Expanded(child: Container()),
-              ]),
-            ),
-          ),
-          Container(
-              height: 50,
+              height: 38,
               margin:
-                  const EdgeInsets.only(left: 8, right: 8, top: 1, bottom: 2),
+                  const EdgeInsets.only(left: 8, right: 4, top: 4, bottom: 4),
               decoration: BoxDecoration(
                   border:
                       Border.all(width: 1, color: Colors.grey.withOpacity(0.2)),
