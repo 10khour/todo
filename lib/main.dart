@@ -2,26 +2,33 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:todo/task.dart';
 import 'package:todo/todo_list.dart';
+import 'package:todo/window.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
+  String? home = Platform.environment['HOME'];
+  String path = "~/.todo/todo.json";
   // 桌面端逻辑
   if ((!kIsWeb) &&
       (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
     WidgetsFlutterBinding.ensureInitialized();
+    if (Platform.isWindows) {
+      home = Platform.environment['UserProfile'];
+    }
     await windowManager.ensureInitialized();
     // 允许最小化
     await windowManager.setMinimizable(true);
     // 拦截程序关闭按键
     await windowManager.setPreventClose(true);
     // 状态托盘
-    // await initSystemTray();
+    await initSystemTray();
     // 添加窗口事件监听者
-    // windowManager.addListener(AppWindowLisenter());
+    windowManager.addListener(AppWindowLisenter());
 
     WindowOptions windowOptions = const WindowOptions(
-      size: Size(1350, 850),
+      size: Size(800, 580),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -33,11 +40,15 @@ void main() async {
       await windowManager.focus();
     });
   }
-  runApp(const MyApp());
+  runApp(MyApp(
+    driver: TaskDriver(path: "${home!}/$path"),
+  ));
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  TaskDriver driver;
+  MyApp({super.key, required this.driver});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,7 +57,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: TodoList(),
+      home: TodoList(
+        driver: driver,
+      ),
     );
   }
 }

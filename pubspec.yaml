@@ -38,6 +38,7 @@ dependencies:
   uuid: ^3.0.7
   window_manager: ^0.3.2
   system_tray: ^2.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -61,8 +62,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/todo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
