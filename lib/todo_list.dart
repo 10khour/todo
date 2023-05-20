@@ -103,6 +103,7 @@ class _TodoListState extends State<TodoList> {
                         ))
                     .toList(),
                 ExpandButton(
+                  fold: widget.foldFinish,
                   onPressed: (bool fold) {
                     setState(() {
                       widget.foldFinish = fold;
