@@ -30,7 +30,7 @@ void main() async {
     windowManager.addListener(AppWindowLisenter());
 
     WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 580),
+      size: Size(1100, 750),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
