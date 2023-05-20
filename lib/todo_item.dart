@@ -57,6 +57,7 @@ class _TodoItemState extends State<TodoItem> {
                   }
                 },
                 style: TextStyle(
+                    decorationThickness: 2.8,
                     decorationColor: const Color.fromRGBO(130, 77, 252, 0.9),
                     decoration: widget.task.finished
                         ? TextDecoration.lineThrough

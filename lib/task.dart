@@ -7,7 +7,6 @@ class Task {
   String id = "";
   bool finished = true;
   String text;
-  List<Task> subTasks = List.empty(growable: true);
   Task({required this.text, this.finished = false}) {
     var uuid = const Uuid();
     id = uuid.v4();
@@ -22,10 +21,11 @@ class Task {
 }
 
 class TaskDriver {
-  String path = "";
-  TaskDriver({required this.path});
+  String todoPath = "";
+  String finishPath = "";
+  TaskDriver({required this.todoPath, required this.finishPath});
 
-  getFile() async {
+  getFile(String path) async {
     File file = File(path);
     bool exists = file.existsSync();
     if (exists) {
@@ -34,13 +34,60 @@ class TaskDriver {
     return await File(path).create(recursive: true);
   }
 
-  Future<List<Task>> getTask() async {
+  unfinish(Task t) async {
+    await _removeTask(t, finishPath);
+    File file = await getFile(todoPath);
+
+    var list = await getTask(finished: false);
+    list.add(t);
+    await file.writeAsString(jsonEncode(list));
+  }
+
+  finish(Task t) async {
+    await _removeTask(t, todoPath);
+    File file = await getFile(finishPath);
+
+    var list = await getTask(finished: true);
+    list.add(t);
+    await file.writeAsString(jsonEncode(list));
+  }
+
+  update(Task t) async {
+    if (t.finished) {
+      return await _update(t, finishPath);
+    }
+    await _update(t, todoPath);
+  }
+
+  Future<List<Task>> getTask({bool finished = false}) async {
+    if (finished) {
+      return await _getTask(finishPath);
+    }
+    return await _getTask(todoPath);
+  }
+
+  addTask(Task t) async {
+    if (t.finished) {
+      return _addTask(t, finishPath);
+    }
+    await _addTask(t, todoPath);
+  }
+
+  removeTask(Task t) async {
+    if (t.finished) {
+      return await _removeTask(t, finishPath);
+    }
+    await _removeTask(t, todoPath);
+  }
+
+  Future<List<Task>> _getTask(String path) async {
     try {
-      File file = await getFile();
+      File file = await getFile(path);
       String contents = await file.readAsString();
       if (contents.isEmpty) {
         return [];
       }
+
       List<dynamic> list = jsonDecode(contents);
       return list.map((e) => Task.fromJson(e)).toList();
     } catch (e) {
@@ -48,31 +95,34 @@ class TaskDriver {
     }
   }
 
-  addTask(Task t) async {
-    List<Task> tasks = await getTask();
-    tasks.add(t);
-    File file = await getFile();
-    return await file.writeAsString(jsonEncode(tasks));
-  }
-
-  removeTask(Task t) async {
-    List<Task> tasks = await getTask();
+  _removeTask(Task t, String path) async {
+    List<Task> tasks = await _getTask(path);
     tasks.removeWhere((element) => element.id == t.id);
-    File file = await getFile();
+    File file = await getFile(path);
     return await file.writeAsString(jsonEncode(tasks));
   }
 
-  update(Task t) async {
-    List<Task> tasks = await getTask();
-    int index = 0;
+  _addTask(Task t, String path) async {
+    List<Task> tasks = await _getTask(path);
+    tasks.add(t);
+    File file = await getFile(path);
+    return await file.writeAsString(jsonEncode(tasks));
+  }
+
+  _update(Task t, String path) async {
+    List<Task> tasks = await _getTask(path);
+    int index = -1;
     for (int i = 0; i < tasks.length; i++) {
       if (tasks[i].id == t.id) {
         index = i;
         break;
       }
     }
+    if (index < 0) {
+      return;
+    }
     tasks[index] = t;
-    File file = await getFile();
+    File file = await getFile(path);
     return await file.writeAsString(jsonEncode(tasks));
   }
 }

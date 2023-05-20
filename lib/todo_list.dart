@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:todo/task.dart';
 import 'package:todo/todo_item.dart';
 
+import 'expand_button.dart';
+
 // ignore: must_be_immutable
 class TodoList extends StatefulWidget {
-  List<Task> task = List.empty(growable: true);
   TaskDriver driver;
+  bool foldFinish = true;
   TodoList({super.key, required this.driver});
   @override
   State<StatefulWidget> createState() {
@@ -14,10 +16,13 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  List<Task> tasks = List.empty(growable: true);
+  List<Task> finishedList = List.empty(growable: true);
+  FocusNode focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
-    FocusNode focusNode = FocusNode();
     OutlineInputBorder myinputborder() {
       //return type is OutlineInputBorder
       return OutlineInputBorder(
@@ -48,7 +53,7 @@ class _TodoListState extends State<TodoList> {
         backgroundColor: const Color.fromRGBO(130, 77, 252, 0.9),
       ),
       body: Column(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
               height: 45,
@@ -59,12 +64,13 @@ class _TodoListState extends State<TodoList> {
                       Border.all(width: 1, color: Colors.grey.withOpacity(0.2)),
                   borderRadius: BorderRadius.circular(20)),
               child: TextField(
+                focusNode: focusNode,
                 autofocus: true,
                 onSubmitted: (value) async {
                   controller.clear();
+                  focusNode.requestFocus();
                   await widget.driver.addTask(Task(text: value));
                   await reload();
-                  focusNode.requestFocus();
                 },
                 controller: controller,
                 decoration: InputDecoration(
@@ -78,32 +84,67 @@ class _TodoListState extends State<TodoList> {
               )),
           Expanded(
             child: ListView(
-              children: widget.task
-                  .map((e) => TodoItem(
-                        update: (t) {
-                          widget.driver.update(t);
-                        },
-                        delete: (t) async {
-                          await widget.driver.removeTask(t);
-                          reload();
-                        },
-                        task: e,
-                      ))
-                  .toList(),
+              children: [
+                ...tasks
+                    .map((e) => TodoItem(
+                          update: (t) async {
+                            if (t.finished) {
+                              await widget.driver.finish(t);
+                              reload();
+                              return;
+                            }
+                            widget.driver.update(t);
+                          },
+                          delete: (t) async {
+                            await widget.driver.removeTask(t);
+                            reload();
+                          },
+                          task: e,
+                        ))
+                    .toList(),
+                ExpandButton(
+                  onPressed: (bool fold) {
+                    setState(() {
+                      widget.foldFinish = fold;
+                    });
+                  },
+                ),
+                if (!widget.foldFinish)
+                  ...finishedList
+                      .map((e) => TodoItem(
+                            update: (t) async {
+                              if (!t.finished) {
+                                await widget.driver.unfinish(t);
+                                reload();
+                                return;
+                              }
+                              widget.driver.update(t);
+                            },
+                            delete: (t) async {
+                              await widget.driver.removeTask(t);
+                              reload();
+                            },
+                            task: e,
+                          ))
+                      .toList(),
+              ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
   reload() async {
-    var tasks = await widget.driver.getTask();
+    var todoList = await widget.driver.getTask();
+    var finished = await widget.driver.getTask(finished: true);
     setState(() {
-      widget.task = tasks;
+      tasks = todoList;
+      finishedList = finished;
     });
   }
 
+  loadFinishedList() async {}
   @override
   void initState() {
     super.initState();

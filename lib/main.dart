@@ -9,7 +9,9 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   String? home = Platform.environment['HOME'];
-  String path = "~/.todo/todo.json";
+  String todoPath = ".todo/todo.json";
+  String finishPath = ".todo/done.json";
+
   // 桌面端逻辑
   if ((!kIsWeb) &&
       (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
@@ -41,7 +43,8 @@ void main() async {
     });
   }
   runApp(MyApp(
-    driver: TaskDriver(path: "${home!}/$path"),
+    driver: TaskDriver(
+        todoPath: "$home/$todoPath", finishPath: "$home/$finishPath"),
   ));
 }
 
