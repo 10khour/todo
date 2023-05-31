@@ -40,7 +40,8 @@ class TaskDriver {
 
     var list = await getTask(finished: false);
     list.add(t);
-    await file.writeAsString(jsonEncode(list));
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    await file.writeAsString(encoder.convert(list));
   }
 
   finish(Task t) async {
@@ -49,7 +50,8 @@ class TaskDriver {
 
     var list = await getTask(finished: true);
     list.add(t);
-    await file.writeAsString(jsonEncode(list));
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    await file.writeAsString(encoder.convert(list));
   }
 
   update(Task t) async {
@@ -99,14 +101,16 @@ class TaskDriver {
     List<Task> tasks = await _getTask(path);
     tasks.removeWhere((element) => element.id == t.id);
     File file = await getFile(path);
-    return await file.writeAsString(jsonEncode(tasks));
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    return await file.writeAsString(encoder.convert(tasks));
   }
 
   _addTask(Task t, String path) async {
     List<Task> tasks = await _getTask(path);
     tasks.add(t);
     File file = await getFile(path);
-    return await file.writeAsString(jsonEncode(tasks));
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    return await file.writeAsString(encoder.convert(tasks));
   }
 
   _update(Task t, String path) async {
@@ -123,6 +127,7 @@ class TaskDriver {
     }
     tasks[index] = t;
     File file = await getFile(path);
-    return await file.writeAsString(jsonEncode(tasks));
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    return await file.writeAsString(encoder.convert(tasks));
   }
 }
