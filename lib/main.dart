@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:todo/task.dart';
 import 'package:todo/todo_list.dart';
 import 'package:todo/window.dart';
@@ -14,33 +15,42 @@ void main() async {
 
   // 桌面端逻辑
   if ((!kIsWeb) &&
-      (Platform.isLinux || Platform.isMacOS || Platform.isWindows)) {
+      (Platform.isLinux ||
+          Platform.isMacOS ||
+          Platform.isWindows ||
+          Platform.isAndroid ||
+          Platform.isIOS)) {
     WidgetsFlutterBinding.ensureInitialized();
     if (Platform.isWindows) {
       home = Platform.environment['UserProfile'];
     }
-    await windowManager.ensureInitialized();
-    // 允许最小化
-    await windowManager.setMinimizable(true);
-    // 拦截程序关闭按键
-    await windowManager.setPreventClose(true);
-    // 状态托盘
-    await initSystemTray();
-    // 添加窗口事件监听者
-    windowManager.addListener(AppWindowLisenter());
+    if (Platform.isIOS || Platform.isAndroid) {
+      home = (await getApplicationDocumentsDirectory()).path;
+    }
+    if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+      await windowManager.ensureInitialized();
+      // 允许最小化
+      await windowManager.setMinimizable(true);
+      // 拦截程序关闭按键
+      await windowManager.setPreventClose(true);
+      // 状态托盘
+      await initSystemTray();
+      // 添加窗口事件监听者
+      windowManager.addListener(AppWindowLisenter());
 
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(1100, 750),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
-      windowButtonVisibility: true,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+      WindowOptions windowOptions = const WindowOptions(
+        size: Size(1100, 750),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden,
+        windowButtonVisibility: true,
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
   }
   runApp(MyApp(
     driver: TaskDriver(
