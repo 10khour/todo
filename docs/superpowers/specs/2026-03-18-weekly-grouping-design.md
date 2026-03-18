@@ -36,26 +36,33 @@
 
 ### 交互行为
 1. 点击分组标题可展开/折叠该周的任务列表
-2. 展开/折叠状态不持久化，每次打开应用恢复默认设置
+2. 展开/折叠状态**仅在内存中维护**（不写入磁盘），每次打开应用恢复默认设置
 3. 分组按时间倒序排列（本周在最上）
 4. 每个分组显示该周完成的任务数量
 
 ### 数据层变更
 
+#### 遗留数据处理
+- 对于没有 `finishedAt` 字段的历史任务（在此功能之前完成的），使用 `createdAt` 作为分组依据
+- 如果两者都不存在，归入"未知时间"分组，显示在列表最底部
+
 #### TaskDriver 新增方法
 ```dart
 /// 将已完成任务按周分组
-/// 返回 Map: 周标签 -> 该周的任务列表
-Map<String, List<Task>> groupTasksByWeek(List<Task> finishedTasks)
+/// 返回 LinkedHashMap: 周标签 -> 该周的任务列表（按周倒序排列）
+LinkedHashMap<String, List<Task>> groupTasksByWeek(List<Task> finishedTasks)
 ```
 
 #### 周计算辅助方法
 ```dart
-/// 获取任务所在的周标识（用于分组）
-String getWeekKey(DateTime finishedAt)
+/// 获取任务所在的周起始日（周一）作为标识
+DateTime getWeekStart(DateTime dateTime)
 
 /// 生成周标签
-String getWeekLabel(DateTime weekStart, {bool isRelative = true})
+/// isCurrentWeek: 是否是当前周
+/// isLastWeek: 是否是上周
+/// isTwoWeeksAgo: 是否是两周前
+String getWeekLabel(DateTime weekStart, {bool isCurrentWeek = false, bool isLastWeek = false, bool isTwoWeeksAgo = false})
 ```
 
 ### UI 层变更
@@ -66,14 +73,16 @@ String getWeekLabel(DateTime weekStart, {bool isRelative = true})
 #### 修改组件
 - `TodoList`:
   - 使用分组后的数据渲染已完成任务
-  - 维护各周的展开/折叠状态（`Map<String, bool>`）
+  - 在内存中维护各周的展开/折叠状态（`Map<String, bool>`）
   - 本周默认展开，其余默认折叠
+  - **本周为空时**：如果本周没有已完成任务，则展开最近的有任务的一周，其余折叠
 
 ### 边界情况处理
 1. **没有已完成任务**: 显示"暂无已完成任务"提示
 2. **某周没有任务**: 不显示该周分组
 3. **跨周完成任务**: 严格按照 `finishedAt` 时间戳分组
-4. **时区问题**: 使用设备本地时区计算周
+4. **时区问题**: 使用设备本地时区计算周；不处理夏令时转换边界情况
+5. **本周为空但有历史任务**: 展开最近的有任务的一周
 
 ## 实现范围
 - [x] 任务按周分组算法
