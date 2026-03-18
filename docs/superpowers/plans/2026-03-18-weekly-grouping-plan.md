@@ -119,8 +119,8 @@ LinkedHashMap<String, List<Task>> groupTasksByWeek(List<Task> finishedTasks) {
     final tasks = groupedByWeekStart[weekStart]!;
     // 同一周内按完成时间倒序
     tasks.sort((a, b) {
-      final aTime = b.finishedAt ?? b.createdAt;
-      final bTime = a.finishedAt ?? a.createdAt;
+      final aTime = a.finishedAt ?? a.createdAt;
+      final bTime = b.finishedAt ?? b.createdAt;
       if (aTime == null || bTime == null) return 0;
       return bTime.compareTo(aTime);
     });
@@ -301,7 +301,6 @@ reload() async {
   // 初始化展开状态：本周展开，其他折叠
   final expandedState = <String, bool>{};
   if (grouped.isNotEmpty) {
-    final firstWeek = grouped.keys.first;
     // 找出"本周"或者第一个非空周展开
     for (final label in grouped.keys) {
       if (label.startsWith('本周')) {
@@ -311,7 +310,7 @@ reload() async {
       }
     }
     // 如果没有本周的任务，展开第一个有任务的周
-    if (!expandedState.containsValue(true) && grouped.isNotEmpty) {
+    if (!expandedState.containsValue(true)) {
       expandedState[grouped.keys.first] = true;
     }
   }
@@ -368,14 +367,14 @@ if (!widget.foldFinish && groupedFinishedTasks != null)
                 update: (t) async {
                   if (!t.finished) {
                     await widget.driver.unfinish(t);
-                    reload();
+                    await reload();
                     return;
                   }
-                  widget.driver.update(t);
+                  await widget.driver.update(t);
                 },
                 delete: (t) async {
                   await widget.driver.removeTask(t);
-                  reload();
+                  await reload();
                 },
                 task: task,
               )),
