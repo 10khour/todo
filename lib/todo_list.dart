@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:todo/task.dart';
 import 'package:todo/todo_item.dart';
@@ -18,6 +20,7 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   List<Task> tasks = List.empty(growable: true);
   List<Task> finishedList = List.empty(growable: true);
+  LinkedHashMap<String, List<Task>> finishedByWeek = LinkedHashMap();
   FocusNode focusNode = FocusNode();
 
   @override
@@ -111,8 +114,24 @@ class _TodoListState extends State<TodoList> {
                   },
                 ),
                 if (!widget.foldFinish)
-                  ...finishedList
-                      .map((e) => TodoItem(
+                  ...finishedByWeek.entries.expand((entry) {
+                    final weekLabel = entry.key;
+                    final weekTasks = entry.value;
+                    return [
+                      // 周标题
+                      Container(
+                        padding: const EdgeInsets.only(left: 16, top: 12, bottom: 8),
+                        child: Text(
+                          weekLabel,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      // 该周的任务
+                      ...weekTasks.map((task) => TodoItem(
                             update: (t) async {
                               if (!t.finished) {
                                 await widget.driver.unfinish(t);
@@ -125,9 +144,10 @@ class _TodoListState extends State<TodoList> {
                               await widget.driver.removeTask(t);
                               reload();
                             },
-                            task: e,
-                          ))
-                      .toList(),
+                            task: task,
+                          )),
+                    ];
+                  }).toList(),
               ],
             ),
           ),
@@ -142,6 +162,7 @@ class _TodoListState extends State<TodoList> {
     setState(() {
       tasks = todoList;
       finishedList = finished;
+      finishedByWeek = widget.driver.groupTasksByWeek(finished);
     });
   }
 

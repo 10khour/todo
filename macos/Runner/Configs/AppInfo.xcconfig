@@ -8,7 +8,7 @@
 PRODUCT_NAME = todo
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.todo
+PRODUCT_BUNDLE_IDENTIFIER = com.github.licong.todo
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 github.com/licong. All rights reserved.
